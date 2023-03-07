@@ -259,7 +259,7 @@ export class Visit implements FetchRequestDelegate {
         if (this.view.renderPromise) await this.view.renderPromise
         if (isSuccessful(statusCode) && responseHTML != null) {
           await this.view.renderPage(PageSnapshot.fromHTMLString(responseHTML), false, this.willRender, this)
-          this.performScroll()
+          this.performScroll(true)
           this.adapter.visitRendered(this)
           this.complete()
         } else {
@@ -302,7 +302,7 @@ export class Visit implements FetchRequestDelegate {
         } else {
           if (this.view.renderPromise) await this.view.renderPromise
           await this.view.renderPage(snapshot, isPreview, this.willRender, this)
-          this.performScroll()
+          this.performScroll(false)
           this.adapter.visitRendered(this)
           if (!isPreview) {
             this.complete()
@@ -328,7 +328,7 @@ export class Visit implements FetchRequestDelegate {
     if (this.isSamePage) {
       this.render(async () => {
         this.cacheSnapshot()
-        this.performScroll()
+        this.performScroll(true)
         this.changeHistory()
         this.adapter.visitRendered(this)
       })
@@ -389,7 +389,10 @@ export class Visit implements FetchRequestDelegate {
 
   // Scrolling
 
-  performScroll() {
+  performScroll(force: false) {
+    if(force) {
+      this.scrolled = false;
+    }
     if (!this.scrolled && !this.view.forceReloaded) {
       if (this.action == "restore") {
         this.scrollToRestoredPosition() || this.scrollToAnchor() || this.view.scrollToTop()
